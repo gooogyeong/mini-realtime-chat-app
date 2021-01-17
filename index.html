@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+Basic Socket.io Chat App
+<div id="app">
+    <ul>
+        <li v-for="(msg, idx) in messages" :key="idx">
+            {{ msg }}
+        </li>
+    </ul>
+    <input type="text" v-model="messageInput" />
+    <button @click="sendPrivate">send to me</button>
+    <button @click="sendGlobal">send to everyone</button>
+    <button @click="sendBroadcast">send to everyone but me</button>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script type="module">
+  import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.esm.browser.js'
+
+  const socket = io() // by calling this function, client automatically connects to endpoint /socket.io,
+  // which our server-side app exposed.
+  // On reloading localhost:5000, you see message 'user connected' in node.js console
+  // now that client is connected to socket, we can now do stuffs. For example ...
+
+  const vueApp = new Vue({
+    el: '#app',
+    data: {
+      messageInput: '',
+      messages: []
+    },
+    methods: {
+      sendPrivate() {
+        socket.emit('private message', this.messageInput)
+        this.messageInput = '' // clears input
+      },
+      sendGlobal () {
+        socket.emit('global message', this.messageInput)
+        this.messageInput = ''
+      },
+      sendBroadcast () {
+        socket.emit('broadcast message', this.messageInput)
+        this.messageInput = ''
+      }
+    }
+  })
+
+  socket.on('message', (message) => {
+    // alert(`message received: ${message}`) // listen to every push msg. + react to it
+    vueApp.messages.push(message)
+  })
+</script>
+</body>
+</html>
+
